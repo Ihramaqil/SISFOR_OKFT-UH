@@ -10,25 +10,34 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
-  if (password !== confirmPassword) {
-    alert("Password tidak sama");
-    return;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      alert("Password tidak sama");
+      return;
+    }
 
-  // TODO: Implement register logic di sini
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, confirmPassword }),
+      });
 
-  const params = new URLSearchParams(window.location.search);
-  const agendaId = params.get('agendaId');
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.message || "Registrasi gagal");
+        return;
+      }
 
-  if (agendaId) {
-    navigate(`/agenda/${agendaId}/form-pendaftaran`);
-  } else {
-    navigate("/Login");
-  }
-};
+      const data = await res.json();
+      alert(data.message || "Registrasi berhasil");
 
+      navigate("/login");
+    } catch (error) {
+      alert("Terjadi kesalahan: " + error.message);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-l from-red-700 to-black">
@@ -41,7 +50,7 @@ export default function Register() {
         <form
           onSubmit={handleSubmit}
           className="bg-gray-100 bg-opacity-10 backdrop-blur-md rounded-lg p-10 w-full max-w-md shadow-lg"
-        > 
+        >
           <h1 className="text-white text-4xl font-extrabold mb-8 text-center">
             Daftar Akun Baru
           </h1>

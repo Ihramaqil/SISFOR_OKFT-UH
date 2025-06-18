@@ -4,25 +4,43 @@ import LogoOKFT from "../../assets/OKFT-UH.png";
 
 export default function Login() {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // TODO: Implement login logic
+    const params = new URLSearchParams(window.location.search);
+    const agendaId = params.get("agendaId");
 
-  const params = new URLSearchParams(window.location.search);
-  const agendaId = params.get('agendaId');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-  if (agendaId) {
-    navigate(`/agenda/${agendaId}/form-pendaftaran`);
-  } else {
-    navigate("/form-pendaftaran");
-  }
-}; 
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.message || "Login gagal");
+        return;
+      }
 
+      const data = await res.json();
+      alert(data.message || "Login berhasil");
+
+      // Simpan token ke localStorage
+      localStorage.setItem("access_token", data.access_token);
+
+      if (agendaId) {
+        navigate(`/agenda/${agendaId}/form-pendaftaran`);
+      } else {
+        navigate("/form-pendaftaran");
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan: " + error.message);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-l from-red-700 to-black">

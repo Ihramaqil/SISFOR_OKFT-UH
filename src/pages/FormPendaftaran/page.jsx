@@ -27,17 +27,40 @@ export default function FormPendaftaran() {
       return;
     }
 
-    // TODO: Simpan data pendaftaran di sini
+    try {
+      const res = await fetch("http://localhost:3000/registrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: namaLengkap,
+          nim: NIM,
+          phone: noHp,
+          notes: catatan,
+          agendaId: Number(agendaId),
+        }),
+      });
 
-    await MySwal.fire({
-      icon: "success",
-      title: "Pendaftaran Berhasil!",
-      text: "Tunggu konfirmasi dikirimkan ke email Anda.",
-      confirmButtonColor: "#d33",
-      confirmButtonText: "OK",
-    });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Gagal mendaftar");
+      }
 
-    navigate("/");
+      await MySwal.fire({
+        icon: "success",
+        title: "Pendaftaran Berhasil!",
+        text: "Tunggu konfirmasi dikirimkan ke Whatsapp Anda.",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "OK",
+      });
+
+      navigate("/"); // Atau arahkan ke halaman lain yang diinginkan
+    } catch (error) {
+      MySwal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: error.message,
+      });
+    }
   };
 
   return (
@@ -109,5 +132,5 @@ export default function FormPendaftaran() {
         </div>
       </main>
     </div>
-  ); 
+  );
 }
